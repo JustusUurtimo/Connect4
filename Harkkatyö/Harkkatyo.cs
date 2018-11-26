@@ -7,26 +7,11 @@ using Jypeli.Widgets;
 
 public class Harkkatyo : PhysicsGame
 {
-    public char[,] kenttani =
-    {
-        {'#', '.', '#', '.', '#', '.', '#', '.', '#',  '.', '#', '.', '#', '.', '#'},
-        {'-','-','-','-','-','-','-','-','-','-','-','-','-','-','-'},
-        {'#', '.', '#', '.', '#', '.', '#', '.', '#',  '.', '#', '.', '#', '.', '#'},
-        {'-','-','-','-','-','-','-','-','-','-','-','-','-','-','-'},
-        {'#', '.', '#', '.', '#', '.', '#', '.', '#',  '.', '#', '.', '#', '.', '#'},
-        {'-','-','-','-','-','-','-','-','-','-','-','-','-','-','-'},
-        {'#', '.', '#', '.', '#', '.', '#', '.', '#',  '.', '#', '.', '#', '.', '#'},
-        {'-','-','-','-','-','-','-','-','-','-','-','-','-','-','-'},
-        {'#', '.', '#', '.', '#', '.', '#', '.', '#',  '.', '#', '.', '#', '.', '#'},
-        {'-','-','-','-','-','-','-','-','-','-','-','-','-','-','-'},
-        {'#', '.', '#', '.', '#', '.', '#', '.', '#',  '.', '#', '.', '#', '.', '#'},
-        {'-','-','-','-','-','-','-','-','-','-','-','-','-','-','-'},
-        {'#', '.', '#', '.', '#', '.', '#', '.', '#',  '.', '#', '.', '#', '.', '#'},
-        {'-','-','-','-','-','-','-','-','-','-','-','-','-','-','-'},
-    };
+    private Ruutu[] Sarakkeet;
 
     public override void Begin()
     {
+        this.Sarakkeet = new Ruutu[7];
         // Painovoima, jos tarvii myöhemmin
         Gravity = new Vector(0.0, -800.0);
 
@@ -34,15 +19,15 @@ public class Harkkatyo : PhysicsGame
         LuoKentta();
 
         //vuorot??
-        int vuoro = 1;
-
-
-        Mouse.Listen(MouseButton.Left, ButtonState.Pressed, LuoNappulaP, "ruutu", Mouse.PositionOnScreen);
-
+        IsMouseVisible = true;
        
 
-        
+        Mouse.Listen(MouseButton.Left, ButtonState.Pressed, LuoNappulaP, "ruutu", Mouse.PositionOnWorld);
 
+
+
+       
+        
 
 
 
@@ -57,57 +42,63 @@ public class Harkkatyo : PhysicsGame
     // kentan luominen
     void LuoKentta()
     {
-        TileMap kentta = new TileMap(kenttani);
-        kentta.SetTileMethod('#', LuoSeina);
-        kentta.SetTileMethod('-', LuoMaata);
-        //tyhjät pitää saada olioiksi
-        kentta['.'] = ruutu2;
+        //kaksiulotteinen taulukko s=sarakkeet r=rivit
+        for(int s = 0; s < 6; s++)
+        {
+            for(int r = 0; r < 7; r++)
+            {
+                if(s == 0)
+                {
+                    this.Sarakkeet[r] = new Ruutu(100, 100);
+                }
+            }
+        }
 
-        kentta.Execute();
+        
 
     }
     //maan luominen
     void LuoMaata(Vector paikka, double leveys, double korkeus)
     {
-        PhysicsObject maa = PhysicsObject.CreateStaticObject(leveys, 10);
+        PhysicsObject maa = PhysicsObject.CreateStaticObject(100, 10);
         maa.Color = Color.Blue;
         maa.Shape = Shape.Rectangle;
         maa.Position = paikka;
         Add(maa);
     }
     //seinien luominen
-    void LuoSeina(Vector paikka, double leveys, double korkeus)
+    void LuoSeina(double leveys, double korkeus)
     {
         PhysicsObject seina = PhysicsObject.CreateStaticObject(10, 100);
         seina.Color = Color.Blue;
         seina.Shape = Shape.Rectangle;
-        seina.Position = paikka;
+        
         Add(seina);
     }
 
     //Pelinappulan luonti haluttuun paikkaan.
     void LuoNappulaP(Vector paikka)
     {
-        PhysicsObject nappula = new PhysicsObject(60, 60);
-        nappula.Shape = Shape.Circle;
+        PhysicsObject nappula = new PhysicsObject(100, 100);
+        nappula.Shape = Shape.Rectangle;
         nappula.Color = Color.Red;
         nappula.Position = Mouse.PositionOnWorld;
-        MessageDisplay.Add("" + paikka.X + ", " + paikka.Y);
+        MessageDisplay.Add("" + nappula.Position.X + ", " + nappula.Position.Y);
         Add(nappula);
 
     }
     
     //pitäs luoda tyhjät paikat olioiksi kenttään
 
-    /*class ruutu : PhysicsObject
+    class Ruutu : PhysicsObject
     {
         
         public bool varattu { get; set; }
         public Color vari { get; set; }
         
 
-        public ruutu(double leveys, double korkeus)
-            : base(leveys, korkeus)
+        public Ruutu(double leveys, double korkeus)
+            : base(100, 100)
         {
            
             varattu = false;
@@ -115,14 +106,36 @@ public class Harkkatyo : PhysicsGame
            
             
         }
+    }
+   /* private void HiirenPainallus(Vector paikka)
+    {
+        int painettuKohta = YakselinPaikka(paikka);
+        Console.WriteLine(painettuKohta);
     }*/
-    public PhysicsObject ruutu2()
+    /*
+    private int YakselinPaikka(Vector paikka)
+    {
+        for(int i = 0; i < ruudukkoY.Length; i++)
+        {
+                if (paikka.X >= ruudukkoY[i].X && paikka.Y >= ruudukkoY[i].Y)
+                {
+                    if (paikka.X <= ruudukkoY[i].X + ruudukkoY[i].Width && paikka.Y <= ruudukkoY[i].Y + ruudukkoY[i].Height)
+                    {
+                        return i;
+                    }
+            }
+            
+           
+        }
+        return - 1;
+    }*/
+    /*public PhysicsObject ruutu2()
     {
         PhysicsObject ruutu = new PhysicsObject(40, 40, Shape.Rectangle);
         bool olemassa = false;
         Color vari = Color.Red;
         return ruutu;
-    }
+    }*/
 }
    
 
